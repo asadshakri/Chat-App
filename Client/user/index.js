@@ -1,4 +1,4 @@
-const backend_url="http://localhost:3000";
+const backend_url="http://localhost:4000";
 
 function showLogin() {
     document.getElementById("signupForm").style.display = "none";
@@ -20,13 +20,12 @@ function showLogin() {
     const name=event.target.name.value;
     const email=event.target.email.value;
     const password=event.target.passwd.value;
+    const phone=event.target.phone.value;
     const span=document.getElementById("message1");
     span.innerHTML="";
-    const userDetails={name,email,password,premiumMember:false};
+    const userDetails={name,email,phone,password};
     
     axios.post(`${backend_url}/user/add`,userDetails).then((response)=>{
-         
-  
             alert(response.data.message);
 
     }).catch((error)=>{
@@ -47,17 +46,15 @@ function showLogin() {
 
   function loginUser(event){
     event.preventDefault();
-    const email=event.target.email.value;
+    const emailOrPhone=event.target.identifier.value;
     const password=event.target.passwd.value;
-    const userDetails={email,password};
+    const userDetails={emailOrPhone,password};
     const span=document.getElementById("message2");
     span.innerHTML="";
     axios.post(`${backend_url}/user/login`,userDetails).then((response)=>{
       alert(response.data.message);
       localStorage.setItem("token",response.data.token);
-      localStorage.setItem("email",email);
-
-
+      window.location.href="../chat window/index.html";
     }).catch((error)=>{
       if(error.response.status=="404" || error.response.status=="401")
       {

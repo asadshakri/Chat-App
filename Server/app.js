@@ -8,10 +8,22 @@ const fs=require("fs");
 const morgan=require("morgan");
 const path=require("path");
 
+require("./models/message");
+require("./models/user");
+require("./models/relation");
 
+const messageRouter=require("./routes/messageRouter");
+const userRouter=require("./routes/userRouter");
 
 app.use(cors());
 app.use(express.json());
+
+app.use("/user",userRouter);
+app.use("/message",messageRouter);
+
+
+
+
 
 db.sync({force:false}).then(()=>{
     console.log('Database synced successfully.');
