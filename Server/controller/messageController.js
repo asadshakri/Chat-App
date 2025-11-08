@@ -21,4 +21,23 @@ const addMessage=async(req,res)=>{
     }
 }
 
-module.exports={addMessage};
+const fetchMessages=async(req,res)=>{
+    try{
+        const allMessages=await messages.findAll({
+            include:[{
+                model:users,
+                attributes:['name'],
+                required:false
+            }],
+            order:[['createdAt','ASC']]
+        });
+        res.status(200).json({messages:allMessages});
+    }
+    catch(err)
+    {
+        console.log("Error in fetching messages")
+        res.status(500).json({message:err.message});
+    }
+}
+
+module.exports={addMessage,fetchMessages};
