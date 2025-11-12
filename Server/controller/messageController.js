@@ -12,7 +12,6 @@ const addMessage=async(req,res)=>{
             UserId
         })
         res.status(201).json({message:"Message added successfully"});
-
     }
     catch(err)
     {

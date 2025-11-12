@@ -1,5 +1,5 @@
 const backendUrl="http://localhost:4000"
-
+const socket=io(backendUrl);
 const chatBody = document.getElementById("chatBody");
 const input = document.getElementById("messageInput");
 const sendBtn = document.getElementById("sendBtn");
@@ -22,6 +22,7 @@ async function sendMessage() {
       'Authorization': token
     }
   });
+
 
   const msgDiv = document.createElement("div");
   msgDiv.classList.add("message", "sent", "shadow-sm");
@@ -65,7 +66,7 @@ async function fetchMessages() {
         const msgDiv = document.createElement("div");
         msgDiv.classList.add("message", "received", "shadow-sm");
         msgDiv.innerHTML = `
-          <strong>${msg.User.name}:</strong> ${msg.message}
+          <strong>${msg.User.name}</strong> ${msg.message}
           <div class="timestamp">${new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
         `;
         chatBody.appendChild(msgDiv);
@@ -77,4 +78,9 @@ async function fetchMessages() {
         console.log("Error in fetching messages:", err);
         return;
     }
+}
+
+function logout(){
+    localStorage.removeItem("token");
+    window.location.href="../user/main.html";
 }
