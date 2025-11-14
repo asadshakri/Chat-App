@@ -8,15 +8,29 @@ const socket = io(backendUrl, {
 });
 
 const roombtn=document.getElementById("roomBtn");
-roombtn.addEventListener("click",()=>{
+roombtn.addEventListener("click",async()=>{
+  try{
+  const myEmail=localStorage.getItem("email");
   const roomNameEmail=document.getElementById("roomEnter").value;
-  if(roomNameEmail.trim()===""){
+
+  const response=await axios.post(`${backendUrl}/user/checkEmail`,{email:roomNameEmail});
+    if(response.data.exists===false){
+      alert("The email you entered does not exist. Please enter a valid email to join a room.");
+      return;
+    }
+  const roomName=[myEmail,roomNameEmail].sort().join("-");
+  if(roomName.trim()===""){
     alert("Please enter a valid room name");
     return;
   }
-  socket.emit("join-room",roomNameEmail);
-  window.roomNameEmail=roomNameEmail;
-  alert(`Joined room: ${roomNameEmail}`);
+  socket.emit("join-room",roomName);
+  window.roomName=roomName;
+  alert(`Joined room: ${roomName}`);
+}
+  catch(err){
+    console.log("Error in joining room:",err);
+    return;
+  }
 });
 
 
@@ -53,7 +67,7 @@ async function sendMessage() {
 
  try{
   const text = input.value.trim();
-  if (!text || !window.roomNameEmail)
+  if (!text || !window.roomName)
   { 
      return;
   }
@@ -65,7 +79,7 @@ async function sendMessage() {
     }
   });
 
-  socket.emit("new-message", { message: text, roomName: window.roomNameEmail });
+  socket.emit("new-message", { message: text, roomName: window.roomName });
 
   sentMessage({ message: text, createdAt: new Date() });
 

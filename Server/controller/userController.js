@@ -68,7 +68,7 @@ const loginUser=async(req,res)=>{
                 throw new Error("Something went wrong")
             }
             if(result==true){
-               res.status(200).json({message:"User login successful",token:generateToken(existingUser.id)});
+               res.status(200).json({message:"User login successful",token:generateToken(existingUser.id),email:existingUser.email});
                return;
             }
             else
@@ -85,8 +85,28 @@ const loginUser=async(req,res)=>{
     }
 }
 
+const emailCheck=async(req,res)=>{
+    try{
+        const {email}=req.body;
+        const existingUser=await users.findOne({where:{email:email}});
+        if(existingUser)
+        {
+            res.status(200).json({exists:true});
+        }
+        else
+        {
+            res.status(200).json({exists:false});
+        }
+    }
+    catch(err)
+    {
+        res.status(500).json({message:err.message});
+    }
+}
+
 
 module.exports={
     addUsers,
-    loginUser
+    loginUser,
+    emailCheck
 }

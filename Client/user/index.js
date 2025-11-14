@@ -54,6 +54,7 @@ function showLogin() {
     axios.post(`${backend_url}/user/login`,userDetails).then((response)=>{
       alert(response.data.message);
       localStorage.setItem("token",response.data.token);
+      localStorage.setItem("email",response.data.email);
       window.location.href="../chat window/index.html";
     }).catch((error)=>{
       if(error.response.status=="404" || error.response.status=="401")
