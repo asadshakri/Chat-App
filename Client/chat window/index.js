@@ -7,19 +7,33 @@ const socket = io(backendUrl, {
   auth: { token }
 });
 
+const roombtn=document.getElementById("roomBtn");
+roombtn.addEventListener("click",()=>{
+  const roomNameEmail=document.getElementById("roomEnter").value;
+  if(roomNameEmail.trim()===""){
+    alert("Please enter a valid room name");
+    return;
+  }
+  socket.emit("join-room",roomNameEmail);
+  window.roomNameEmail=roomNameEmail;
+  alert(`Joined room: ${roomNameEmail}`);
+});
+
+
 socket.on("connect", () => {
   console.log("Connected to socket server:", socket.id);
 });
 
-socket.on("connect_error", (err) => {
+/*socket.on("connect_error", (err) => {
   console.error("Socket connection failed:", err.message);
   alert("Authentication failed. Please log in again.");
   localStorage.removeItem("token");
   window.location.href = "../user/main.html";
-});
+});*/
 
 
-socket.on("chat-message", (data) => {
+
+socket.on("new-message", (data) => {
   if (!data) return;
   receivedMessage({
     message: data.message,
@@ -39,7 +53,10 @@ async function sendMessage() {
 
  try{
   const text = input.value.trim();
-  if (!text) return;
+  if (!text || !window.roomNameEmail)
+  { 
+     return;
+  }
 
   const token=localStorage.getItem("token");
   const addedMessage= await axios.post(`${backendUrl}/message/add`, {message:text}, {
@@ -48,7 +65,7 @@ async function sendMessage() {
     }
   });
 
-  socket.emit("chat-message", text);
+  socket.emit("new-message", { message: text, roomName: window.roomNameEmail });
 
   sentMessage({ message: text, createdAt: new Date() });
 
@@ -62,7 +79,7 @@ async function sendMessage() {
 }
 }
 
-window.addEventListener("DOMContentLoaded", fetchMessages);
+//window.addEventListener("DOMContentLoaded", fetchMessages);
 
 async function fetchMessages() {
     try{

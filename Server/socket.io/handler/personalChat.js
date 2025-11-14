@@ -8,10 +8,15 @@ module.exports=(io,socket)=>{
 
     socket.on("new-message",({message,roomName})=>{
         console.log("user:",socket.user.name," sent message:",message);
-        socket.broadcast.emit("new-message",{
+        socket.to(roomName).emit("new-message",{
             message:message,
             name:socket.user.name,
         });
+
+     /*   socket.broadcast.emit("new-message",{
+            message:message,
+            name:socket.user.name,
+        });*/
 
 
     })}
