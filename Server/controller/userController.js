@@ -3,6 +3,8 @@ const bcrypt=require("bcrypt");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const { Op } = require("sequelize");
+const uuid=require("uuid");
+const groups=require("../models/group");
 
 
 const addUsers= async(req,res)=>{
@@ -105,8 +107,25 @@ const emailCheck=async(req,res)=>{
 }
 
 
+const createGroup=async(req,res)=>{
+    try{
+        const {Gname}=req.body;
+        const uuid=v4();
+        await groups.create({name:Gname,uuid:uuid});
+        res.status(201).json({message:"Group created successfully",uuid:uuid});
+
+    }
+    catch(err)
+    {
+        res.status(500).json({message:err.message});
+    }
+
+}
+
+
 module.exports={
     addUsers,
     loginUser,
-    emailCheck
+    emailCheck,
+    createGroup
 }

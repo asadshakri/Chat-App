@@ -11,6 +11,7 @@ module.exports=(io,socket)=>{
         socket.to(roomName).emit("new-message",{
             message:message,
             name:socket.user.name,
+            email:socket.user.email,
         });
 
      /*   socket.broadcast.emit("new-message",{

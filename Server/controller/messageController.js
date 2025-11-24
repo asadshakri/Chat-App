@@ -5,10 +5,12 @@ const users=require("../models/user");
 const addMessage=async(req,res)=>{
     try{
         const message=req.body.message;
+        const roomName=req.body.roomName;
         const UserId=req.user.id;
     
         await messages.create({
             message,
+            roomName,
             UserId
         })
         res.status(201).json({message:"Message added successfully"});
@@ -22,7 +24,9 @@ const addMessage=async(req,res)=>{
 
 const fetchMessages=async(req,res)=>{
     try{
+        const roomName=req.body.roomName;
         const allMessages=await messages.findAll({
+            where:{roomName:roomName},
             include:[{
                 model:users,
                 attributes:['name'],

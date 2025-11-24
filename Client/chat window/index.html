@@ -14,12 +14,15 @@
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
- 
   <div>
     <nav class="navbar bg-danger p-3 rounded">
       <div class="container-fluid">
-        <span class="navbar-brand mb-0 h1 "><i class="bi bi-chat-dots-fill fs-4 p-2"></i>GROUP CHAT APPLICATION</span>
+        <span class="navbar-brand mb-0 h1 "><i class="bi bi-chat-dots-fill fs-4 p-2 "></i>GROUP CHAT APPLICATION</span>
+        <div class="d-flex gap-3">
+        <button type="button" id="group" class="btn btn-light ms-auto"  onclick="joinGroup()"><i class="bi bi-people-fill"> Join Group</i></button>
+        <button type="button" id="group" class="btn btn-warning ms-auto"  onclick="createGroup()"><i class="bi bi-people-fill"> Create Group</i></button>
         <button type="button" id="logout" class="btn btn-danger ms-auto" onclick="logout()"><i class="bi bi-box-arrow-right"></i></button>
+        </div>
       </div>
     </nav>
   </div>
@@ -32,10 +35,10 @@
             placeholder="Enter room email"
             name="roomEnter"
             class="form-control"
-            >
-            <button type="button" id="roomBtn" class="btn btn-light ms-2">Enter</button>
-
+            >      
+            <button type="button" id="roomBtn" class="btn btn-light ms-2">Join</button>
       </div>
+      <ul id="chatListUI" class="list-group room-list mt-3"></ul>
     </div>
 
   <div class="chat-container d-flex flex-column ">
@@ -43,10 +46,8 @@
 
     <div class="bg-danger text-white p-2 d-flex align-items-center gap-3">
       <i class="bi bi-people fs-4"></i>
-      <strong>GROUP CHAT</strong>
+      <strong id="pName">Email</strong>
     </div>
-
-
     <div id="chatBody" class="chat-body bg-transparent d-flex flex-column">
        <!-- Messages will be appended here
          
@@ -60,15 +61,12 @@
         <div class="timestamp"></div>
       </div>-->
     </div>
-
-
     <div class="chat-footer p-2 border-top d-flex align-items-center">
       <input id="messageInput" type="text" class="form-control me-2" placeholder="Type a message...">
       <button id="sendBtn" class="btn btn-danger rounded-circle px-3">
         <i class="bi bi-send"></i>
       </button>
     </div>
-
   </div>
   </div>
   <script

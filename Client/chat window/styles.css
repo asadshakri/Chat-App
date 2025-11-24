@@ -62,3 +62,25 @@ body {
   .chat-footer input {
     border-radius: 20px;
   }
+
+  .popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .popup-content {
+    background: rgb(170, 141, 141);
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+  }
+  .close-btn {
+    float: right;
+    cursor: pointer;
+  }

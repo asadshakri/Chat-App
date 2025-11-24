@@ -7,6 +7,7 @@ const userController=require("../controller/userController");
 router.post("/add",userController.addUsers);
 router.post("/login",userController.loginUser);
 router.post("/checkEmail",userController.emailCheck);
+router.post("/createGroup",userController.createGroup);
 
 
 

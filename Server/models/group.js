@@ -1,22 +1,22 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../utils/db-connection");
 
-const messages= sequelize.define("messages",{
+const groups= sequelize.define("groups",{
     id:{
         type:DataTypes.INTEGER,
         autoIncrement:true,
         primaryKey:true,
         allowNull:false,
     },
-    message:{
-        type:DataTypes.TEXT,
-        allowNull:false,
-    },
-    roomName:{
+    name:{
         type:DataTypes.STRING,
         allowNull:false,
+    },
+    uuid:{
+        type:DataTypes.STRING,
+        allowNull:false,
+        unique:true,
     }
-
 });
 
-module.exports=messages;
+module.exports=groups;

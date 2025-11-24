@@ -17,9 +17,11 @@ const server=http.createServer(app);
 require("./models/message");
 require("./models/user");
 require("./models/relation");
+require("./models/group");
 
 const messageRouter=require("./routes/messageRouter");
 const userRouter=require("./routes/userRouter");
+const chatRouter=require("./routes/chatListRouter");
 
 
 app.use(cors());
@@ -29,6 +31,7 @@ socketIO(server);
 
 app.use("/user",userRouter);
 app.use("/message",messageRouter);
+app.use("/chat",chatRouter);
 
 
 
