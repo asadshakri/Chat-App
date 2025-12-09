@@ -226,12 +226,12 @@ function createGroup(){
             return;
         }
         try{
-            const response=await axios.post(`${backendUrl}/group/create`,{name:groupName},{
+            const response=await axios.post(`${backendUrl}/user/createGroup`,{Gname:groupName},{
                 headers:{
                     'Authorization':localStorage.getItem("token")
                 }
             });
-            alert(`Group "${response.data.group.name}" created successfully!`);
+            alert(`Group "${response.data.Gname}" created successfully!`);
             document.body.removeChild(popUpDiv);
         }
         catch(err){
@@ -269,7 +269,7 @@ function joinGroup(){
             return;
         }
         try{
-            const response=await axios.post(`${backendUrl}/group/join`,{name:groupName},{
+            const response=await axios.post(`${backendUrl}/user/joinGroup`,{Guuid:groupName},{
                 headers:{
                     'Authorization':localStorage.getItem("token")
                 }

@@ -8,6 +8,7 @@ router.post("/add",userController.addUsers);
 router.post("/login",userController.loginUser);
 router.post("/checkEmail",userController.emailCheck);
 router.post("/createGroup",userController.createGroup);
+//router.post("/joinGroup",middleware,userController.joinGroup);
 
 
 
