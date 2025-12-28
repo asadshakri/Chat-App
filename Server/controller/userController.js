@@ -93,6 +93,11 @@ const createGroup = async (req, res) => {
     const { Gname } = req.body;
     const uuid = uuids.v4();
     await groups.create({ name: Gname, uuid: uuid });
+
+    const userId=req.user.id;
+    const user = await users.findByPk(userId);
+    const groupId= await groups.findOne({where:{uuid:uuid}});
+    await user.addGroup(groupId);
     res
       .status(201)
       .json({
@@ -105,9 +110,7 @@ const createGroup = async (req, res) => {
   }
 };
 
-
-/*const joinGroup= async(req,res)=>{
-
+const joinGroup= async(req,res)=>{
       try{
          const {Guuid}= req.body;
          const userId=req.user.id;
@@ -116,19 +119,29 @@ const createGroup = async (req, res) => {
             res.status(404).json({message:"Group not found! Please check the Group ID"});
             return;
          }
-         const user = await users.findByPk(userId);
-          await user.addGroup(Guuid);
-          res.status(200).json({message:"User successfully joined the group"});        
+    const user = await users.findByPk(userId);
+
+    const alreadyJoined = await existingGroup.hasUser(user);
+    if (alreadyJoined) {
+      return res.status(409).json({ message: "Already a group member" });
+    }
+    
+    const groupId= await groups.findOne({where:{uuid:Guuid}});
+    await user.addGroup(groupId);
+          res.status(200).json({message:"User successfully joined the group",
+            uuid:Guuid,
+            Gname:existingGroup.name
+          });        
       }
       catch(err){
          res.status(500).json({message:err.message});
       }
-    }*/
+    }
 
 module.exports = {
   addUsers,
   loginUser,
   emailCheck,
   createGroup,
-  //joinGroup
+  joinGroup
 };

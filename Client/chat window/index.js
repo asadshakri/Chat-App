@@ -56,6 +56,24 @@ socket.on("connect", () => {
 
 socket.on("new-message", (data) => {
   if (!data) return;
+ 
+  
+
+  receivedMessage({
+    message: data.message,
+    User: { name: data.name },
+    createdAt: new Date()
+  });
+ 
+
+      
+
+
+  chatBody.scrollTop = chatBody.scrollHeight;
+});
+
+socket.on("new-G-message", (data) => {
+  if (!data) return;
 
   receivedMessage({
     message: data.message,
@@ -232,7 +250,28 @@ function createGroup(){
                 }
             });
             alert(`Group "${response.data.Gname}" created successfully!`);
+    
             document.body.removeChild(popUpDiv);
+            const myEmail=localStorage.getItem("email");
+          const roomName=response.data.uuid;
+          chatBody.innerHTML="";
+          socket.emit("join-G-room",roomName);
+  window.roomName=roomName;
+  localStorage.setItem("roomName",roomName);
+  document.getElementById("pName").textContent=`Chatting with: ${response.data.Gname}`;
+  //document.getElementById("roomEnter").value="";
+  localStorage.setItem("chatWith", roomName);
+  fetchMessages();
+
+const ul = document.getElementById("chatListUI");
+const li = document.createElement("li");
+li.className = "list-group-item list-group-item-action";
+li.textContent = `👥 ${response.data.Gname}`;
+li.onclick = () => joinExistingGroup({uuid: response.data.uuid, name: response.data.Gname});
+ul.appendChild(li);
+
+
+   
         }
         catch(err){
             console.log("Error in creating group:",err);
@@ -249,7 +288,7 @@ function joinGroup(){
     <span class="close-btn" id="closeBtn">&times;</span>
     <h3>Join Group</h3>
     <br>
-    <input type="text" class="form-control" id="groupNameInput" placeholder="Enter group ID" />
+    <input type="text" class="form-control" id="groupIdInput" placeholder="Enter group ID" />
     <br>
     <button type="button" class="btn btn-light" id="joinGroupBtn">Join</button>
   </div>`;
@@ -263,19 +302,36 @@ function joinGroup(){
 
     const joinGroupBtn=document.getElementById("joinGroupBtn");
     joinGroupBtn.addEventListener("click",async()=>{
-        const groupName=document.getElementById("groupNameInput").value.trim();
-        if(groupName===""){
+        const groupId=document.getElementById("groupIdInput").value.trim();
+        if(groupId===""){
             alert("Please enter a valid group ID");
             return;
         }
         try{
-            const response=await axios.post(`${backendUrl}/user/joinGroup`,{Guuid:groupName},{
+            const response=await axios.post(`${backendUrl}/user/joinGroup`,{Guuid:groupId},{
                 headers:{
                     'Authorization':localStorage.getItem("token")
                 }
             });
-            alert(`Joined group "${response.data.group.name}" successfully!`);
+            alert(`Joined group "${response.data.Gname}" successfully!`);
             document.body.removeChild(popUpDiv);
+            const myEmail=localStorage.getItem("email");
+            const roomName=response.data.uuid;
+            chatBody.innerHTML="";
+            socket.emit("join-G-room",roomName);
+    window.roomName=roomName;
+    localStorage.setItem("roomName",roomName);
+    document.getElementById("pName").textContent=`Chatting with: ${response.data.Gname}`;
+    //document.getElementById("roomEnter").value="";
+    localStorage.setItem("chatWith", roomName);
+    fetchMessages();
+    const ul = document.getElementById("chatListUI");
+const li = document.createElement("li");
+li.className = "list-group-item list-group-item-action";
+li.textContent = `👥 ${response.data.Gname}`;
+li.onclick = () => joinExistingGroup({uuid: response.data.uuid, name: response.data.Gname});
+ul.appendChild(li);
+
         }
         catch(err){
             console.log("Error in joining group:",err);
@@ -284,6 +340,7 @@ function joinGroup(){
     });
 }
 
+let list;
 
 async function loadChatList() {
   try {
@@ -293,16 +350,25 @@ async function loadChatList() {
       headers: { Authorization: token }
     });
 
-    const list = response.data.chatList;
+    list = response.data.chatList;
     const ul = document.getElementById("chatListUI");
     ul.innerHTML = "";
 
-    list.forEach(user => {
+    list.forEach(chat => {
       const li = document.createElement("li");
       li.className = "list-group-item list-group-item-action";
-      li.textContent = user.email;
 
-      li.addEventListener("click", () => joinExistingChat(user.email));
+    
+      if (chat.type === "user") {
+        li.textContent = chat.email;
+        li.onclick = () => joinExistingChat(chat.email);
+      }
+
+     
+      if (chat.type === "group") {
+        li.textContent = `👥 ${chat.name}`;
+        li.onclick = () => joinExistingGroup(chat);
+      }
 
       ul.appendChild(li);
     });
@@ -321,5 +387,20 @@ function joinExistingChat(friends_email){
   window.roomName=roomName;
   localStorage.setItem("roomName",roomName);
   document.getElementById("pName").textContent=`Chatting with: ${friends_email}`;
+  fetchMessages();
+}
+
+function joinExistingGroup(group) {
+  chatBody.innerHTML = "";
+
+  socket.emit("join-G-room", group.uuid);
+
+  window.roomName = group.uuid;
+  localStorage.setItem("roomName", group.uuid);
+  localStorage.setItem("chatWith", group.name);
+
+  document.getElementById("pName").textContent =
+    `Chatting with: ${group.name}`;
+
   fetchMessages();
 }

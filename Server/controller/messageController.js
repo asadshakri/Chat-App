@@ -7,7 +7,9 @@ const addMessage=async(req,res)=>{
         const message=req.body.message;
         const roomName=req.body.roomName;
         const UserId=req.user.id;
-    
+        if (!message || !roomName) {
+            return res.status(400).json({ message: "Invalid message data" });
+          }
         await messages.create({
             message,
             roomName,
