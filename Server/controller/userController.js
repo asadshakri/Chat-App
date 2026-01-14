@@ -116,14 +116,13 @@ const joinGroup= async(req,res)=>{
          const userId=req.user.id;
          const existingGroup=await groups.findOne({where:{uuid:Guuid}});
          if(!existingGroup){
-            res.status(404).json({message:"Group not found! Please check the Group ID"});
-            return;
+            throw new Error("Group not found");
          }
     const user = await users.findByPk(userId);
 
     const alreadyJoined = await existingGroup.hasUser(user);
     if (alreadyJoined) {
-      return res.status(409).json({ message: "Already a group member" });
+      throw new Error("User already a member of the group");
     }
     
     const groupId= await groups.findOne({where:{uuid:Guuid}});
@@ -134,9 +133,19 @@ const joinGroup= async(req,res)=>{
           });        
       }
       catch(err){
-         res.status(500).json({message:err.message});
+         if(err.message==="Group not found"){
+            res.status(404).json({message:err.message});
+         }
+          else if(err.message==="User already a member of the group"){
+              res.status(409).json({message:err.message});
+          }
+          else{
+              res.status(500).json({message:err.message});
+          }
       }
     }
+
+    //const getUserName
 
 module.exports = {
   addUsers,

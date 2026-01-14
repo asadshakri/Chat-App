@@ -10,12 +10,19 @@ const messages= sequelize.define("messages",{
     },
     message:{
         type:DataTypes.TEXT,
-        allowNull:false,
+        allowNull:true,
     },
     roomName:{
         type:DataTypes.STRING,
         allowNull:false,
-    }
+    },
+    type: {
+        type: DataTypes.STRING,
+        defaultValue: "text"
+      },
+    mediaType: {
+        type: DataTypes.STRING
+      }
 
 });
 

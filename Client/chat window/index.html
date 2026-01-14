@@ -21,6 +21,7 @@
         <div class="d-flex gap-3">
         <button type="button" id="group" class="btn btn-light ms-auto"  onclick="joinGroup()"><i class="bi bi-people-fill"> Join Group</i></button>
         <button type="button" id="group" class="btn btn-warning ms-auto"  onclick="createGroup()"><i class="bi bi-people-fill"> Create Group</i></button>
+        <span class="navbar-brand mb-0 h3" id="emailLog"></span>
         <button type="button" id="logout" class="btn btn-danger ms-auto" onclick="logout()"><i class="bi bi-box-arrow-right"></i></button>
         </div>
       </div>
@@ -49,23 +50,41 @@
       <strong id="pName">Email</strong>
     </div>
     <div id="chatBody" class="chat-body bg-transparent d-flex flex-column">
-       <!-- Messages will be appended here
-         
-        <div class="message received shadow-sm">
-       
-        <div class="timestamp"></div>
-      </div>
-
-      <div class="message sent shadow-sm">
-   
-        <div class="timestamp"></div>
-      </div>-->
+     
     </div>
-    <div class="chat-footer p-2 border-top d-flex align-items-center">
-      <input id="messageInput" type="text" class="form-control me-2" placeholder="Type a message...">
+   
+   
+    <div class="chat-footer p-2 border-top d-flex align-items-center gap-2">
+      <div id="suggestions" class="d-flex gap-2 mb-1 flex-wrap"></div>
+      
+      <label for="mediaInput" class="btn btn-light rounded-circle">
+        <i class="bi bi-paperclip"></i>
+      </label>
+    
+   
+      <input 
+        type="file"
+        id="mediaInput"
+        hidden
+        accept="image/*,video/*,.pdf,.doc,.docx"
+        onchange="sendMedia()"
+      />
+    
+     
+    
+      <input 
+        id="messageInput"
+        type="text"
+        class="form-control"
+        placeholder="Type a message..."
+      />
+    
+   
       <button id="sendBtn" class="btn btn-danger rounded-circle px-3">
         <i class="bi bi-send"></i>
       </button>
+    
+    </div>
     </div>
   </div>
   </div>

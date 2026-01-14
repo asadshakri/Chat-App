@@ -56,18 +56,23 @@ socket.on("connect", () => {
 
 socket.on("new-message", (data) => {
   if (!data) return;
- 
-  
 
-  receivedMessage({
+  const token = localStorage.getItem("token");
+  const decoded = JSON.parse(atob(token.split(".")[1]));
+  const currentUserId = decoded.userId;
+
+  const msg = {
     message: data.message,
+    mediaType: data.mediaType,
     User: { name: data.name },
-    createdAt: new Date()
-  });
- 
+    createdAt: data.createdAt || new Date()
+  };
 
-      
-
+  if (data.UserId === currentUserId) {
+    sentMessage(msg);        // ✅ YOUR message
+  } else {
+    receivedMessage(msg);    // ✅ OTHER user's message
+  }
 
   chatBody.scrollTop = chatBody.scrollHeight;
 });
@@ -77,13 +82,11 @@ socket.on("new-G-message", (data) => {
 
   receivedMessage({
     message: data.message,
+    mediaType: data.mediaType,
     User: { name: data.name },
     createdAt: new Date()
   });
  
-   
-  
-
   chatBody.scrollTop = chatBody.scrollHeight;
 });
 
@@ -124,6 +127,14 @@ async function sendMessage() {
 }
 
 window.addEventListener("DOMContentLoaded", ()=>{
+
+  //const username=axios.get(`${backendUrl}/user/name`,{
+  if(localStorage.getItem("token")===null){
+    window.location.href="../user/main.html";
+  }
+  const myEmail=localStorage.getItem("email");
+  const emailLog=document.getElementById("emailLog");
+  emailLog.textContent=`${myEmail}`;
   const chatWith=localStorage.getItem("chatWith");
   if(chatWith){
     document.getElementById("pName").textContent=`Chatting with: ${chatWith}`;
@@ -145,8 +156,12 @@ async function fetchMessages() {
     }
     window.roomName=roomName;
     const token = localStorage.getItem("token");
-
-    socket.emit("join-room", roomName);
+    if (roomName.includes("@")) {
+      socket.emit("join-room", roomName);
+    } else {
+      socket.emit("join-G-room", roomName);
+    }
+  //  socket.emit("join-room", roomName);
 
     const response = await axios.post(`${backendUrl}/message/get`, {
       roomName
@@ -173,40 +188,78 @@ async function fetchMessages() {
   }
 }
 
-function sentMessage(msg){
-  const msgDiv = document.createElement("div");
-  msgDiv.classList.add("message", "sent", "shadow-sm");
-  msgDiv.innerHTML = `
-    ${msg.message}
-    <div class="timestamp">
-  ${new Date(msg.createdAt).toLocaleString([], {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  })}
-</div>
-  `;
-  chatBody.appendChild(msgDiv);
+function sentMessage(msg) {
+  const div = document.createElement("div");
+  div.classList.add("message", "sent", "shadow-sm");
+
+  if (!msg.mediaType) {
+    div.innerHTML = `
+      ${msg.message}
+      <div class="timestamp">${new Date(msg.createdAt).toLocaleString()}</div>
+    `;
+  } else if (msg.mediaType.startsWith("image")) {
+    div.innerHTML = `
+      <img src="${msg.message}" class="img-fluid rounded mt-1">
+      <div class="timestamp">${new Date(msg.createdAt).toLocaleString()}</div>
+    `;
+  } else if (msg.mediaType.startsWith("video")) {
+    div.innerHTML = `
+      <video controls class="w-100 mt-1">
+        <source src="${msg.message}">
+      </video>
+      <div class="timestamp">${new Date(msg.createdAt).toLocaleString()}</div>
+    `;
+  } else {
+    div.innerHTML = `
+      <a href="${msg.message}" target="_blank">📎 Download</a>
+      <div class="timestamp">${new Date(msg.createdAt).toLocaleString()}</div>
+    `;
+  }
+
+  chatBody.appendChild(div);
 }
 
-function receivedMessage(msg){
-  const msgDiv = document.createElement("div");
-  msgDiv.classList.add("message", "received", "shadow-sm");
-  msgDiv.innerHTML = `
+function receivedMessage(msg) {
+  const div = document.createElement("div");
+  div.classList.add("message", "received", "shadow-sm");
+
+  if(!msg.mediaType){
+    div.innerHTML = `
     <strong>${msg.User.name}</strong> ${msg.message}
     <div class="timestamp">
-  ${new Date(msg.createdAt).toLocaleString([], {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  })}
+  ${new Date(msg.createdAt).toLocaleString()}
 </div>
   `;
-  chatBody.appendChild(msgDiv);
+}
+  else if (msg.mediaType?.startsWith("image")) {
+    div.innerHTML = `
+      <strong>${msg.User.name}</strong><br>
+      <img src="${msg.message}" class="img-fluid rounded mt-1">
+        <div class="timestamp">
+  ${new Date(msg.createdAt).toLocaleString()}
+</div>
+    `;
+  } else if (msg.mediaType?.startsWith("video")) {
+    div.innerHTML = `
+      <strong>${msg.User.name}</strong><br>
+      <video controls class="w-100 mt-1">
+        <source src="${msg.message}">
+      </video>
+        <div class="timestamp">
+  ${new Date(msg.createdAt).toLocaleString()}
+</div>
+    `;
+  } else {
+    div.innerHTML = `
+      <strong>${msg.User.name}</strong><br>
+      <a href="${msg.message}" target="_blank">📎 Download</a>
+          <div class="timestamp">
+  ${new Date(msg.createdAt).toLocaleString()}
+</div>
+    `;
+  }
+
+  chatBody.appendChild(div);
 }
 
 function logout(){
@@ -335,7 +388,7 @@ ul.appendChild(li);
         }
         catch(err){
             console.log("Error in joining group:",err);
-            alert("Failed to join group. Please try again.");
+            alert(`${err.response.data.message}`);
         }
     });
 }
@@ -403,4 +456,62 @@ function joinExistingGroup(group) {
     `Chatting with: ${group.name}`;
 
   fetchMessages();
+}
+
+
+async function sendMedia() {
+  const fileInput = document.getElementById("mediaInput");
+  const file = fileInput.files[0];
+  if (!file || !window.roomName) return;
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("roomName", window.roomName);
+
+  try {
+    await axios.post(`${backendUrl}/media/upload`, formData, {
+      headers: {
+        Authorization: localStorage.getItem("token")
+      }
+    });
+
+
+    fileInput.value = "";
+
+  } catch (err) {
+    alert("Media upload failed");
+  }
+}
+
+
+let typingTimeout;
+const messageInput = document.getElementById("messageInput");
+messageInput.addEventListener("input", () => {
+  clearTimeout(typingTimeout);
+
+  typingTimeout = setTimeout(async () => {
+    if (messageInput.value.length < 3) return;
+
+    const res = await axios.post(`${backendUrl}/suggest`, {
+      text: messageInput.value,
+     // tone: "casual"
+    });
+    renderSuggestions(res.data.suggestions);
+  }, 400);
+});
+
+function renderSuggestions(words) {
+  const div = document.getElementById("suggestions");
+  div.innerHTML = "";
+
+  words.forEach(w => {
+    const btn = document.createElement("button");
+    btn.className = "btn btn-sm btn-light";
+    btn.innerText = w;
+    btn.onclick = () => {
+      messageInput.value += " " + w;
+      div.innerHTML = "";
+    };
+    div.appendChild(btn);
+  });
 }

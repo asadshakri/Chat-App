@@ -1,5 +1,12 @@
 const backend_url="http://localhost:4000";
 
+window.onload=function(){
+  if(localStorage.getItem("token")){
+    window.location.href="../chat window/index.html";
+  }
+  document.getElementById("loginForm").style.display = "block";
+}
+
 function showLogin() {
     document.getElementById("signupForm").style.display = "none";
     document.getElementById("loginForm").style.display = "block";
